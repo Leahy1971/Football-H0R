@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Club - Football Connect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand"><h1>⚽ Football Connect</h1></div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <div class="nav-user" id="navUser">
+                    <a href="/dashboard.html" class="nav-link">Dashboard</a>
+                    <span class="nav-link username" id="navUsername"></span>
+                    <button class="btn btn-small" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="form-container">
+            <h2 class="text-center">Add Club</h2>
+            <form id="clubForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Club Name *</label>
+                    <input type="text" id="club_name" name="club_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="location" name="location" placeholder="City, Country">
+                </div>
+                <div class="form-group">
+                    <label>Level</label>
+                    <select id="level" name="level">
+                        <option value="">Select level</option>
+                        <option value="Professional">Professional</option>
+                        <option value="Semi-Professional">Semi-Professional</option>
+                        <option value="Amateur">Amateur</option>
+                        <option value="Youth">Youth</option>
+                        <option value="Grassroots">Grassroots</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="description" name="description" placeholder="Describe your club..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Staff Information</label>
+                    <textarea id="staff_info" name="staff_info" placeholder="Coaches, managers, trainers..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" id="contact_email" name="contact_email">
+                </div>
+                <div class="form-group">
+                    <label>Contact Phone</label>
+                    <input type="tel" id="contact_phone" name="contact_phone">
+                </div>
+                <div class="form-group">
+                    <label>Club Image</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>YouTube Video URL</label>
+                    <input type="url" id="video_url" name="video_url" placeholder="https://youtube.com/watch?v=...">
+                </div>
+                <div id="message"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Add Club</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isAuth = await checkAuth();
+            if (!isAuth) {
+                window.location.href = '/login.html';
+                return;
+            }
+        });
+
+        document.getElementById('clubForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('club_name', document.getElementById('club_name').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('level', document.getElementById('level').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('staff_info', document.getElementById('staff_info').value);
+            formData.append('contact_email', document.getElementById('contact_email').value);
+            formData.append('contact_phone', document.getElementById('contact_phone').value);
+            formData.append('video_url', document.getElementById('video_url').value);
+            
+            const imageFile = document.getElementById('image').files[0];
+            if (imageFile) formData.append('image', imageFile);
+            
+            try {
+                const response = await fetch('/api/clubs', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('message', 'Club created successfully!');
+                    setTimeout(() => {
+                        window.location.href = '/clubs.html';
+                    }, 1500);
+                } else {
+                    showError('message', data.error || 'Failed to create club');
+                }
+            } catch (error) {
+                showError('message', 'Failed to create club. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

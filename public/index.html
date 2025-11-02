@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Player & Club Connector</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>⚽ Football Connect</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/clubs.html" class="nav-link">Clubs</a>
+                <a href="/players.html" class="nav-link">Players</a>
+                <div class="nav-user" id="navUser" style="display: none;">
+                    <a href="/dashboard.html" class="nav-link">Dashboard</a>
+                    <a href="/messages.html" class="nav-link" id="messagesLink">
+                        Messages
+                        <span class="badge" id="messagesBadge" style="display: none;">0</span>
+                    </a>
+                    <a href="/notifications.html" class="nav-link" id="notificationsLink">
+                        Notifications
+                        <span class="badge" id="notificationsBadge" style="display: none;">0</span>
+                    </a>
+                    <span class="nav-link username" id="navUsername"></span>
+                    <button class="btn btn-small" id="logoutBtn">Logout</button>
+                </div>
+                <div class="nav-auth" id="navAuth">
+                    <a href="/login.html" class="btn btn-small">Login</a>
+                    <a href="/register.html" class="btn btn-small btn-primary">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Connect Football Clubs & Players</h1>
+                <p>Find players, discover opportunities, build your team</p>
+                <div class="hero-actions">
+                    <a href="/register.html" class="btn btn-primary btn-large">Get Started</a>
+                    <a href="/players.html" class="btn btn-large">Browse Players</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2>How It Works</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">👤</div>
+                        <h3>Create Profile</h3>
+                        <p>Sign up as a player or club representative</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📋</div>
+                        <h3>Post Listings</h3>
+                        <p>List available players or required positions</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Connect</h3>
+                        <p>Send connection requests to start conversations</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💬</div>
+                        <h3>Message</h3>
+                        <p>Chat with connected users and arrange trials</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="search-section">
+            <div class="container">
+                <h2>Quick Search</h2>
+                <div class="search-bar">
+                    <input type="text" id="quickSearch" placeholder="Search clubs, players, positions..." class="search-input">
+                    <button class="btn btn-primary" id="searchBtn">Search</button>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </section>
+
+        <section class="recent-listings">
+            <div class="container">
+                <h2>Recent Player Listings</h2>
+                <div id="recentPlayers" class="cards-grid"></div>
+                <div class="text-center">
+                    <a href="/players.html" class="btn">View All Players</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="recent-clubs">
+            <div class="container">
+                <h2>Featured Clubs</h2>
+                <div id="recentClubs" class="cards-grid"></div>
+                <div class="text-center">
+                    <a href="/clubs.html" class="btn">View All Clubs</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Football Connect. Connecting clubs and players worldwide.</p>
+        </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

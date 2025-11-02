@@ -1,0 +1,21 @@
+{
+  "name": "football-h0r",
+  "version": "1.0.0",
+  "description": "Football player and club connector",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "keywords": ["football", "soccer", "club", "player", "recruitment"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2"
+  }
+}
