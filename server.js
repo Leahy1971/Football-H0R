@@ -106,7 +106,17 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const upload = multer({ 
+    storage: storage, 
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'), false);
+        }
+    }
+});
 
 // Middleware
 app.use(express.json());
@@ -114,7 +124,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 app.use(session({
-    secret: 'football-secret-key-2024',
+    secret: process.env.SESSION_SECRET || 'football-secret-key-2024',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 }
@@ -397,7 +407,7 @@ app.post('/api/connections', requireAuth, (req, res) => {
     try {
         const { connected_user_id } = req.body;
         
-        if (req.session.userId === parseInt(connected_user_id)) {
+        if (req.session.userId === parseInt(connected_user_id, 10)) {
             return res.status(400).json({ error: 'Cannot connect to yourself' });
         }
         
@@ -482,6 +492,14 @@ app.post('/api/messages', requireAuth, (req, res) => {
     try {
         const { receiver_id, message } = req.body;
         
+        // Validate message
+        if (!message || message.trim().length === 0) {
+            return res.status(400).json({ error: 'Message cannot be empty' });
+        }
+        if (message.length > 5000) {
+            return res.status(400).json({ error: 'Message too long (max 5000 characters)' });
+        }
+        
         // Check if users are connected
         const connection = db.prepare(`
             SELECT * FROM connections 
@@ -494,7 +512,7 @@ app.post('/api/messages', requireAuth, (req, res) => {
         }
         
         const stmt = db.prepare('INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)');
-        const result = stmt.run(req.session.userId, receiver_id, message);
+        const result = stmt.run(req.session.userId, receiver_id, message.trim());
         
         // Create notification
         const notifStmt = db.prepare('INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)');

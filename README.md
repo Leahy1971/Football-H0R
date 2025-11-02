@@ -215,9 +215,19 @@ The codebase is designed to be extensible:
 
 - Passwords are hashed using bcrypt
 - Session-based authentication
-- CSRF protection through same-origin policy
-- File upload restrictions (5MB limit, image files only)
 - SQL injection prevention through prepared statements
+- File upload restrictions (5MB limit, image files only with MIME type validation)
+- Input validation for messages and user data
+- YouTube video ID validation to prevent XSS
+
+### Production Recommendations
+For production deployment, consider adding:
+- Rate limiting (e.g., using express-rate-limit)
+- CSRF protection (e.g., using csurf middleware)
+- HTTPS/SSL for secure cookie transmission
+- Environment variables for sensitive configuration
+- Additional input sanitization
+- Database backups and replication
 
 ## 🐛 Troubleshooting
 
