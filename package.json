@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "populate-clubs": "node populate-clubs.js",
     "test": "echo \"No tests specified yet\" && exit 0"
   },
   "keywords": ["football", "soccer", "club", "player", "recruitment"],

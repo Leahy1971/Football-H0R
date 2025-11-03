@@ -59,6 +59,14 @@ The application runs on port 3000 by default. You can change this by setting the
 PORT=8080 npm start
 ```
 
+### Populate Club Directory
+To populate the database with a directory of English non-league clubs (National League, NLS, NLN, Isthmian leagues):
+```bash
+npm run populate-clubs
+```
+
+This will add 170+ clubs from various English leagues to the database.
+
 ## 📖 Usage Guide
 
 ### Getting Started
