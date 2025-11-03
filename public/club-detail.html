@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Details - Football Connect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand"><h1>⚽ Football Connect</h1></div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/clubs.html" class="nav-link">Clubs</a>
+                <a href="/players.html" class="nav-link">Players</a>
+                <div class="nav-user" id="navUser" style="display: none;">
+                    <a href="/dashboard.html" class="nav-link">Dashboard</a>
+                    <a href="/messages.html" class="nav-link">Messages</a>
+                    <span class="nav-link username" id="navUsername"></span>
+                    <button class="btn btn-small" id="logoutBtn">Logout</button>
+                </div>
+                <div class="nav-auth" id="navAuth">
+                    <a href="/login.html" class="btn btn-small">Login</a>
+                    <a href="/register.html" class="btn btn-small btn-primary">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="detail-container">
+        <div id="clubDetails"></div>
+        
+        <div class="detail-section" style="margin-top: 3rem;">
+            <h3>Player Listings from this Club</h3>
+            <div id="clubPlayers" class="cards-grid"></div>
+        </div>
+    </main>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        let club = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            const params = new URLSearchParams(window.location.search);
+            const clubId = params.get('id');
+            
+            if (!clubId) {
+                window.location.href = '/clubs.html';
+                return;
+            }
+            
+            await loadClub(clubId);
+            await loadClubPlayers(clubId);
+        });
+        
+        async function loadClub(id) {
+            try {
+                const response = await fetch(`/api/clubs/${id}`);
+                club = await response.json();
+                displayClub();
+            } catch (error) {
+                console.error('Failed to load club:', error);
+                document.getElementById('clubDetails').innerHTML = '<p class="error-message">Failed to load club details</p>';
+            }
+        }
+        
+        function displayClub() {
+            const canConnect = currentUser && club.user_id !== currentUser.id;
+            
+            document.getElementById('clubDetails').innerHTML = `
+                <div class="detail-header">
+                    ${club.image_url ? `<img src="${club.image_url}" alt="${club.club_name}" class="detail-image">` : '<div class="detail-image" style="background: #e5e7eb; display: flex; align-items: center; justify-content: center;">No Image</div>'}
+                    <div class="detail-info">
+                        <h1>${club.club_name}</h1>
+                        <div class="card-meta" style="font-size: 1.1rem; margin-bottom: 1rem;">
+                            ${club.location || 'Location N/A'}
+                        </div>
+                        <div class="card-tags" style="margin-bottom: 1rem;">
+                            ${club.level ? `<span class="tag tag-primary" style="font-size: 1rem;">${club.level}</span>` : ''}
+                        </div>
+                        <p><strong>Posted by:</strong> ${club.username}</p>
+                        ${club.contact_email ? `<p><strong>Email:</strong> ${club.contact_email}</p>` : ''}
+                        ${club.contact_phone ? `<p><strong>Phone:</strong> ${club.contact_phone}</p>` : ''}
+                        ${canConnect ? `
+                        <div class="detail-actions">
+                            <button class="btn btn-primary" onclick="connect(${club.user_id})">Connect to Chat</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                ${club.description ? `
+                <div class="detail-section">
+                    <h3>About</h3>
+                    <p>${club.description}</p>
+                </div>
+                ` : ''}
+                
+                ${club.staff_info ? `
+                <div class="detail-section">
+                    <h3>Staff</h3>
+                    <p>${club.staff_info}</p>
+                </div>
+                ` : ''}
+                
+                ${club.video_url ? `
+                <div class="detail-section">
+                    <h3>Video</h3>
+                    ${createYouTubeEmbed(club.video_url)}
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        async function loadClubPlayers(clubId) {
+            try {
+                const response = await fetch(`/api/players?club_id=${clubId}`);
+                const players = await response.json();
+                
+                const container = document.getElementById('clubPlayers');
+                if (players.length === 0) {
+                    container.innerHTML = '<p>No player listings from this club yet.</p>';
+                    return;
+                }
+                
+                container.innerHTML = players.map(player => `
+                    <div class="card" onclick="window.location.href='/player-detail.html?id=${player.id}'">
+                        ${player.image_url ? `<img src="${player.image_url}" alt="${player.player_name}" class="card-image">` : ''}
+                        <h3 class="card-title">${player.player_name}</h3>
+                        <div class="card-meta">${player.position || 'N/A'} • ${player.age ? player.age + ' years' : 'Age N/A'}</div>
+                        <div class="card-tags">
+                            <span class="tag ${player.listing_type === 'available' ? 'tag-success' : 'tag-primary'}">
+                                ${player.listing_type === 'available' ? 'Available' : 'Required'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load club players:', error);
+            }
+        }
+        
+        async function connect(userId) {
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/connections', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ connected_user_id: userId })
+                });
+                
+                if (response.ok) {
+                    alert('Connection request sent!');
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to send connection request');
+                }
+            } catch (error) {
+                alert('Failed to send connection request');
+            }
+        }
+    </script>
+</body>
+</html>

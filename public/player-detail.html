@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Details - Football Connect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand"><h1>⚽ Football Connect</h1></div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/clubs.html" class="nav-link">Clubs</a>
+                <a href="/players.html" class="nav-link">Players</a>
+                <div class="nav-user" id="navUser" style="display: none;">
+                    <a href="/dashboard.html" class="nav-link">Dashboard</a>
+                    <a href="/messages.html" class="nav-link">Messages</a>
+                    <span class="nav-link username" id="navUsername"></span>
+                    <button class="btn btn-small" id="logoutBtn">Logout</button>
+                </div>
+                <div class="nav-auth" id="navAuth">
+                    <a href="/login.html" class="btn btn-small">Login</a>
+                    <a href="/register.html" class="btn btn-small btn-primary">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="detail-container">
+        <div id="playerDetails"></div>
+    </main>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        let player = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            const params = new URLSearchParams(window.location.search);
+            const playerId = params.get('id');
+            
+            if (!playerId) {
+                window.location.href = '/players.html';
+                return;
+            }
+            
+            await loadPlayer(playerId);
+        });
+        
+        async function loadPlayer(id) {
+            try {
+                const response = await fetch(`/api/players/${id}`);
+                player = await response.json();
+                displayPlayer();
+            } catch (error) {
+                console.error('Failed to load player:', error);
+                document.getElementById('playerDetails').innerHTML = '<p class="error-message">Failed to load player details</p>';
+            }
+        }
+        
+        function displayPlayer() {
+            const canConnect = currentUser && player.user_id !== currentUser.id;
+            
+            document.getElementById('playerDetails').innerHTML = `
+                <div class="detail-header">
+                    ${player.image_url ? `<img src="${player.image_url}" alt="${player.player_name}" class="detail-image">` : '<div class="detail-image" style="background: #e5e7eb; display: flex; align-items: center; justify-content: center;">No Image</div>'}
+                    <div class="detail-info">
+                        <h1>${player.player_name}</h1>
+                        <div class="card-meta" style="font-size: 1.1rem; margin-bottom: 1rem;">
+                            ${player.position || 'Position N/A'} • ${player.age ? player.age + ' years' : 'Age N/A'}
+                        </div>
+                        <div class="card-tags" style="margin-bottom: 1rem;">
+                            <span class="tag ${player.listing_type === 'available' ? 'tag-success' : 'tag-primary'}" style="font-size: 1rem;">
+                                ${player.listing_type === 'available' ? 'Available' : 'Required'}
+                            </span>
+                            ${player.experience ? `<span class="tag" style="font-size: 1rem;">${player.experience}</span>` : ''}
+                            ${player.availability ? `<span class="tag" style="font-size: 1rem;">${player.availability}</span>` : ''}
+                        </div>
+                        <p><strong>Posted by:</strong> ${player.username}</p>
+                        ${player.club_name ? `<p><strong>Club:</strong> <a href="/club-detail.html?id=${player.club_id}">${player.club_name}</a></p>` : ''}
+                        ${canConnect ? `
+                        <div class="detail-actions">
+                            <button class="btn btn-primary" onclick="connect(${player.user_id})">Connect to Chat</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                ${player.bio ? `
+                <div class="detail-section">
+                    <h3>About</h3>
+                    <p>${player.bio}</p>
+                </div>
+                ` : ''}
+                
+                ${player.video_url ? `
+                <div class="detail-section">
+                    <h3>Video</h3>
+                    ${createYouTubeEmbed(player.video_url)}
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        async function connect(userId) {
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/connections', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ connected_user_id: userId })
+                });
+                
+                if (response.ok) {
+                    alert('Connection request sent!');
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to send connection request');
+                }
+            } catch (error) {
+                alert('Failed to send connection request');
+            }
+        }
+    </script>
+</body>
+</html>

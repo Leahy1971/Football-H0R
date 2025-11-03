@@ -1,0 +1,9 @@
+node_modules/
+uploads/
+football.db
+football.db-shm
+football.db-wal
+.DS_Store
+*.log
+npm-debug.log*
+.env

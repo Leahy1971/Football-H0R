@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Football Connect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>⚽ Football Connect</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/login.html" class="btn btn-small">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="form-container">
+            <h2 class="text-center">Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="user_type">I am a: *</label>
+                    <select id="user_type" name="user_type" required>
+                        <option value="">Select...</option>
+                        <option value="player">Player</option>
+                        <option value="club">Club Representative</option>
+                        <option value="agent">Agent/Scout</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div id="message"></div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+            </form>
+            
+            <p class="text-center mt-3">
+                Already have an account? <a href="/login.html">Login here</a>
+            </p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Football Connect. Connecting clubs and players worldwide.</p>
+        </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showError('message', 'Passwords do not match');
+                return;
+            }
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: password,
+                user_type: document.getElementById('user_type').value,
+                full_name: document.getElementById('full_name').value
+            };
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('message', 'Registration successful! Redirecting to login...');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 2000);
+                } else {
+                    showError('message', data.error || 'Registration failed');
+                }
+            } catch (error) {
+                showError('message', 'Registration failed. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
